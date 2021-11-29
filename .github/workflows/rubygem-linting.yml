@@ -1,0 +1,22 @@
+name: rubygem-linting
+
+on: push
+
+jobs:
+  lint:
+    name: Lint code
+    runs-on: ubuntu-latest
+    if: contains( github.event.repository.topics, 'rubygem' )
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.0
+
+    - name: Install necessary gems
+      run: |
+        gem install rubocop --no-document
+    - name: Run RuboCop
+      run: |
+        rubocop
