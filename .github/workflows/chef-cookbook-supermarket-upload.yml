@@ -1,0 +1,51 @@
+name: chef-cookbook-supermarket-upload
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  supermarket:
+    runs-on: ubuntu-latest
+    if: contains( github.event.repository.topics, 'chef-cookbook' )
+    steps:
+    - name: Check out code
+      uses: actions/checkout@main
+
+    - name: Install Chef
+      uses: actionshub/chef-install@main
+
+      # Different keys are necessary when using different Chef Supermarket
+      # PRIVATE
+    - name: Configure private Chef
+      if: contains( github.event.repository.topics, 'internal' )
+      env:
+        TR_CHEF_SUPERMARKET_USER_SSHKEY: ${{ secrets.TR_CHEF_SUPERMARKET_USER_SSHKEY }}
+      run: |
+        echo "${TR_CHEF_SUPERMARKET_USER_SSHKEY}" > /tmp/userkey.pem
+      # PUBLIC
+    - name: Configure public Chef
+      if: contains( github.event.repository.topics, 'opensource' )
+      env:
+        PUBLIC_CHEF_SUPERMARKET_USER_SSHKEY: ${{ secrets.PUBLIC_CHEF_SUPERMARKET_USER_SSHKEY }}
+      run: |
+        echo "${PUBLIC_CHEF_SUPERMARKET_USER_SSHKEY}" > /tmp/userkey.pem
+
+      # Different URLs and users are necessary when using different Chef Supermarket
+      # PRIVATE
+    - name: upload to private supermarket
+      if: contains( github.event.repository.topics, 'internal' )
+      env:
+        TR_CHEF_SUPERMARKET_URL: ${{ secrets.TR_CHEF_SUPERMARKET_URL }}
+        TR_CHEF_SUPERMARKET_USER: ${{ secrets.TR_CHEF_SUPERMARKET_USER }}
+      run: |
+        knife supermarket share $(grep "^name" metadata.rb | cut -d\' -f2) --cookbook-path ${GITHUB_WORKSPACE}/.. --supermarket-site "${TR_CHEF_SUPERMARKET_URL}" --user ${TR_CHEF_SUPERMARKET_USER} --key /tmp/userkey.pem --verbose --yes
+      # PUBLIC
+    - name: upload to public supermarket
+      if: contains( github.event.repository.topics, 'opensource' )
+      env:
+        PUBLIC_CHEF_SUPERMARKET_URL: ${{ secrets.PUBLIC_CHEF_SUPERMARKET_URL }}
+        PUBLIC_CHEF_SUPERMARKET_USER: ${{ secrets.PUBLIC_CHEF_SUPERMARKET_USER }}
+      run: |
+        knife supermarket share $(grep "^name" metadata.rb | cut -d\' -f2) --cookbook-path ${GITHUB_WORKSPACE}/.. --supermarket-site "${PUBLIC_CHEF_SUPERMARKET_URL}" --user ${PUBLIC_CHEF_SUPERMARKET_USER} --key /tmp/userkey.pem --verbose --yes
