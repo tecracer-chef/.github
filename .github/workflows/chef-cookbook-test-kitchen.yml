@@ -1,0 +1,58 @@
+name: chef-cookbook-test-kitchen
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  ec2:
+    runs-on: ubuntu-latest
+    if: contains( github.event.repository.topics, 'chef-cookbook' )
+    strategy:
+      matrix:
+        os: ['amazon', 'amazon2', 'ubuntu-1604', 'ubuntu-1804', 'ubuntu-2004', 'centos-7', 'rhel-77', 'rhel-8']
+        suite: ['default']
+      fail-fast: false
+    steps:
+    - name: Check out code
+      uses: actions/checkout@main
+    - name: Install Chef
+      uses: actionshub/chef-install@main
+    - name: Configure aws cli
+      run: |
+        mkdir ~/.aws
+        chmod 700 ~/.aws
+        echo "[default]" > ~/.aws/config
+        echo "output=json" >> ~/.aws/config
+        chmod 600 ~/.aws/config
+        echo "[default]" >> ~/.aws/credentials
+        echo "aws_access_key_id=${AWS_ACCESS_KEY}" >> ~/.aws/credentials
+        echo "aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
+        chmod 600 ~/.aws/credentials
+      env:
+        AWS_ACCESS_KEY: ${{ secrets.TK_AWS_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.TK_AWS_SECRET_ACCESS_KEY }}
+    - name: Configure SSH
+      run: |
+        mkdir ~/.ssh
+        chmod 700 ~/.ssh
+        echo "${DEPLOY_SSH_KEY}" > ~/.ssh/id_rsa-kitchen
+        chmod 600 ~/.ssh/id_rsa-kitchen
+      env:
+        DEPLOY_SSH_KEY: ${{ secrets.TK_AWS_SSH_PRIVATE_KEY }}
+    - name: Run test-kitchen
+      run: |
+        kitchen test ${SUITE}-${OS} -d always
+      env:
+        SUITE: ${{matrix.suite}}
+        OS: ${{matrix.os}}
+        CHEF_LICENSE: accept-no-persist
+        KITCHEN_LOCAL_YAML: kitchen.ec2.yml
+        TK_AWS_SSH_KEY_ID: ${{secrets.TK_AWS_SSH_KEY_ID}}
+        TK_AWS_SUBNET_ID: ${{secrets.TK_AWS_SUBNET_ID}}
+        TK_AWS_SG_ID: ${{secrets.TK_AWS_SG_ID}}
+        TK_AWS_INTERFACE: ${{secrets.TK_AWS_INTERFACE}}
+        TK_AWS_ASSOCIATE_PUBLIC_IP: ${{secrets.TK_AWS_ASSOCIATE_PUBLIC_IP}}
+        TK_AWS_REGION: ${{secrets.TK_AWS_REGION}}
