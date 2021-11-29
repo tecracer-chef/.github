@@ -1,0 +1,71 @@
+---
+name: rubygem-publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  rubygem-publish:
+    runs-on: ubuntu-latest
+    if: contains( github.event.repository.topics, 'rubygem' )
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0
+
+      - name: Install necessary gems
+        run: |
+          gem install rotp -v 6.2.0 --no-document
+
+      - name: build gem
+        run: |
+          gem build *.gemspec
+
+        # Different keys are necessary when using different host
+        # PRIVATE
+      - name: Configure private rubygem
+        if: contains( github.event.repository.topics, 'internal' )
+        run: |
+          mkdir -p $HOME/.gem
+          touch $HOME/.gem/credentials
+          chmod 0600 $HOME/.gem/credentials
+          printf -- "---\n:rubygems_api_key: ${TR_RUBYGEM_AUTH_TOKEN}\n" > $HOME/.gem/credentials
+        env:
+          TR_RUBYGEM_AUTH_TOKEN: ${{secrets.TR_RUBYGEM_AUTH_TOKEN}}
+
+        # PUBLIC
+      - name: Configure public rubygem
+        if: contains( github.event.repository.topics, 'opensource' )
+        run: |
+          mkdir -p $HOME/.gem
+          touch $HOME/.gem/credentials
+          chmod 0600 $HOME/.gem/credentials
+          printf -- "---\n:rubygems_api_key: ${PUBLIC_RUBYGEM_AUTH_TOKEN}\n" > $HOME/.gem/credentials
+        env:
+          PUBLIC_RUBYGEM_AUTH_TOKEN: ${{secrets.PUBLIC_RUBYGEM_AUTH_TOKEN}}
+
+        # Different URLs and users are necessary when using different Chef Supermarket
+        # PRIVATE
+      - name: publish to internal rubygems repo
+        if: contains( github.event.repository.topics, 'internal' )
+        run: |
+          gem push *.gem --host ${TR_RUBYGEM_HOST_URL}
+        env:
+          TR_RUBYGEM_HOST_URL: ${{secrets.TR_RUBYGEM_HOST_URL}}
+          TR_RUBYGEM_AUTH_TOKEN: ${{secrets.TR_RUBYGEM_AUTH_TOKEN}}
+
+        # PUBLIC
+      - name: publish to rubygems.org
+        if: contains( github.event.repository.topics, 'opensource' )
+        run: |
+          gem push *.gem --otp $(rotp --secret ${PUBLIC_RUBYGEM_HOST_OTP_SECRET}) --host ${PUBLIC_RUBYGEM_HOST_URL}
+        env:
+          PUBLIC_RUBYGEM_HOST_OTP_SECRET: ${{secrets.PUBLIC_RUBYGEM_HOST_OTP_SECRET}}
+          PUBLIC_RUBYGEM_HOST_URL: ${{secrets.PUBLIC_RUBYGEM_HOST_URL}}
+          PUBLIC_RUBYGEM_AUTH_TOKEN: ${{secrets.PUBLIC_RUBYGEM_AUTH_TOKEN}}
