@@ -1,0 +1,21 @@
+name: chef-cookbook-linting
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  cookstyle:
+    runs-on: ubuntu-latest
+    if: contains( github.event.repository.topics, 'chef-cookbook' )
+    steps:
+    - name: Check out code
+      uses: actions/checkout@main
+    - name: Install Chef
+      uses: actionshub/chef-install@main
+    - name: Run cookstyle
+      run: cookstyle
+      env:
+        CHEF_LICENSE: accept-no-persist
