@@ -1,6 +1,8 @@
 name: chef-cookbook-test-kitchen
 
 on:
+  schedule:
+    - cron: 20 07 * * 1
   pull_request:
   push:
     branches:
