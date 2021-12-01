@@ -1,9 +1,6 @@
 name: rubygem-linting
 
-on:
-  schedule:
-    - cron: 20 07 * * 1
-  push:
+on: workflow_call
 
 jobs:
   lint:

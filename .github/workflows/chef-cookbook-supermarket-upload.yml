@@ -1,9 +1,6 @@
 name: chef-cookbook-supermarket-upload
 
-on:
-  push:
-    tags:
-      - 'v*.*.*'
+on: workflow_call
 
 jobs:
   supermarket:

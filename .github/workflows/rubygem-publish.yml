@@ -1,10 +1,7 @@
 ---
 name: rubygem-publish
 
-on:
-  push:
-    tags:
-      - 'v*.*.*'
+on: workflow_call
 
 jobs:
   rubygem-publish:
