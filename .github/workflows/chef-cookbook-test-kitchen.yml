@@ -1,6 +1,35 @@
 name: chef-cookbook-test-kitchen
 
-on: workflow_call
+on:
+  workflow_call:
+    secrets:
+      TK_AWS_ACCESS_KEY:
+        description: 'The AWS CLI Access Key'
+        required: true
+      TK_AWS_SECRET_ACCESS_KEY:
+        description: 'The AWS CLI Secret Access Key'
+        required: true
+      TK_AWS_SSH_PRIVATE_KEY:
+        description: 'The AWS SSH private KEY to be used (optional)'
+        required: false
+      TK_AWS_SSH_KEY_ID:
+        description: 'The SSH public KEY ID within AWS (optional)'
+        required: false
+      TK_AWS_SUBNET_ID:
+        description: 'AWS Subnet ID where to start EC2 instances'
+        required: true
+      TK_AWS_SG_ID:
+        description: 'Security Group to ue'
+        required: true
+      TK_AWS_INTERFACE:
+        description: 'Should be always public'
+        required: false
+      TK_AWS_ASSOCIATE_PUBLIC_IP:
+        description: 'Should a public IP automatically assigned to the EC2 instances'
+        required: false
+      TK_AWS_REGION:
+        description: 'The AWS Region where to start EC2 instances'
+        required: false
 
 jobs:
   dokken:

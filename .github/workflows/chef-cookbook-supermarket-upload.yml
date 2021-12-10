@@ -1,6 +1,26 @@
 name: chef-cookbook-supermarket-upload
 
-on: workflow_call
+on:
+  workflow_call:
+    secrets:
+      TR_CHEF_SUPERMARKET_USER:
+        description: 'The user to login against the Chef Supermarket'
+        required: false
+      TR_CHEF_SUPERMARKET_USER_SSHKEY:
+        description: 'The private key that the user uses to authenticate against Chef Supermarket'
+        required: false
+      TR_CHEF_SUPERMARKET_URL:
+        description: 'The Chef Supermarket URL itself'
+        required: false
+      PUBLIC_CHEF_SUPERMARKET_USER:
+        description: 'The user to login against the Chef Supermarket'
+        required: false
+      PUBLIC_CHEF_SUPERMARKET_USER_SSHKEY:
+        description: 'The private key that the user uses to authenticate against Chef Supermarket'
+        required: false
+      PUBLIC_CHEF_SUPERMARKET_URL:
+        description: 'The Chef Supermarket URL itself'
+        required: false
 
 jobs:
   supermarket:

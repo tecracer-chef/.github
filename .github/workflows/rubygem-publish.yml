@@ -1,7 +1,23 @@
 ---
 name: rubygem-publish
 
-on: workflow_call
+on:
+  workflow_call:
+    secrets:
+      TR_RUBYGEM_AUTH_TOKEN:
+        description: 'Authentication api key/token for uploading gems'
+        required: false
+      TR_RUBYGEM_HOST_URL:
+        description: 'The URL where to upload private gems to'
+        required: false
+      PUBLIC_RUBYGEM_HOST_URL:
+        description: 'normally https://rubygems.org'
+      PUBLIC_RUBYGEM_HOST_OTP_SECRET:
+        description: 'The secret of the one time password to authenticate'
+        required: false
+      PUBLIC_RUBYGEM_AUTH_TOKEN:
+        description: 'Authentication api key/token for uploading gems'
+        required: false
 
 jobs:
   rubygem-publish:
