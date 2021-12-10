@@ -84,10 +84,10 @@ jobs:
       run: |
         mkdir ~/.ssh
         chmod 700 ~/.ssh
-        echo "${DEPLOY_SSH_KEY}" > ~/.ssh/id_rsa-kitchen
+        echo "${TK_AWS_SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa-kitchen
         chmod 600 ~/.ssh/id_rsa-kitchen
       env:
-        DEPLOY_SSH_KEY: ${{ secrets.TK_AWS_SSH_PRIVATE_KEY }}
+        TK_AWS_SSH_PRIVATE_KEY: ${{ secrets.TK_AWS_SSH_PRIVATE_KEY }}
     - name: Run test-kitchen
       run: |
         kitchen test ${SUITE}-${OS} -d always
