@@ -1,3 +1,4 @@
+---
 name: rubygem-linting
 
 on: workflow_call
