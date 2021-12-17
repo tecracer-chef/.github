@@ -1,3 +1,4 @@
+---
 name: chef-cookbook-test-kitchen
 
 on:
@@ -44,7 +45,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@master
       - name: Install Chef
-        uses: actionshub/chef-install@master
+        uses: actionshub/chef-install@main
       - name: Run test-kitchen
         run: |
           kitchen test ${SUITE}-${OS} -d always

@@ -1,3 +1,4 @@
+---
 name: chef-cookbook-linting
 
 on: workflow_call
