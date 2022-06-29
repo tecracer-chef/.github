@@ -1,4 +1,3 @@
----
 name: chef-cookbook-test-kitchen
 
 on:
@@ -39,18 +38,21 @@ jobs:
     strategy:
       matrix:
         os: ['amazon2', 'centos-7', 'centos-8', 'debian-9', 'debian-10', 'opensuse-leap-15', 'ubuntu-1604', 'ubuntu-1804', 'ubuntu-2004']
-        suite: ['default']
       fail-fast: false
     steps:
       - name: Check out code
         uses: actions/checkout@master
       - name: Install Chef
-        uses: actionshub/chef-install@main
+        uses: actionshub/chef-install@master
       - name: Run test-kitchen
         run: |
-          kitchen test ${SUITE}-${OS} -d always
+          if [[ $(kitchen list | grep ${OS}) ]]
+          then
+            kitchen test ${OS} -d always
+          else
+            echo "not found, so skipping this step"
+          fi
         env:
-          SUITE: ${{matrix.suite}}
           OS: ${{matrix.os}}
           CHEF_LICENSE: accept-no-persist
           KITCHEN_LOCAL_YAML: kitchen.dokken.yml
@@ -60,7 +62,6 @@ jobs:
     strategy:
       matrix:
         os: ['amazon', 'amazon2', 'ubuntu-1604', 'ubuntu-1804', 'ubuntu-2004', 'centos-7', 'rhel-77', 'rhel-8']
-        suite: ['default']
       fail-fast: false
     steps:
     - name: Check out code
@@ -91,9 +92,13 @@ jobs:
         TK_AWS_SSH_PRIVATE_KEY: ${{ secrets.TK_AWS_SSH_PRIVATE_KEY }}
     - name: Run test-kitchen
       run: |
-        kitchen test ${SUITE}-${OS} -d always
+          if [[ $(kitchen list | grep ${OS}) ]]
+          then
+            kitchen test ${OS} -d always
+          else
+            echo "not found, so skipping this step"
+          fi
       env:
-        SUITE: ${{matrix.suite}}
         OS: ${{matrix.os}}
         CHEF_LICENSE: accept-no-persist
         KITCHEN_LOCAL_YAML: kitchen.ec2.yml
